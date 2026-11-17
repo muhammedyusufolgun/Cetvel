@@ -28,6 +28,7 @@ public class MainActivity extends Activity {
     private final class RulerView extends View {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final float density = getResources().getDisplayMetrics().density;
+        private final float xdpi = getResources().getDisplayMetrics().xdpi;
         private final float ydpi = getResources().getDisplayMetrics().ydpi;
         private final float band = 100 * density;
         private final float inset = 6 * density;
@@ -36,7 +37,7 @@ public class MainActivity extends Activity {
         private void drawSteel(Canvas c, float w, float h) {
             p.setStyle(Paint.Style.FILL);
             p.setShader(new LinearGradient(0, 0, band, 0,
-                    new int[]{0xffd99b9b,0xffffe3e1,0xfff4c4c1,0xffffefed,0xffdca5a4},
+                    new int[]{0xffd4c7a8,0xfffff7e4,0xffeee1c5,0xfffff9e9,0xffd9c9a7},
                     new float[]{0f,0.08f,0.5f,0.92f,1f}, Shader.TileMode.CLAMP));
             c.drawRect(0,0,band,h,p);
             p.setShader(new LinearGradient(w-band, 0, w, 0,
@@ -62,15 +63,20 @@ public class MainActivity extends Activity {
 
         private void edgeScale(Canvas c,float w,float h,boolean left) {
             float pixelsPerMm=ydpi/25.4f;
+            float pixelsPerMmX=xdpi/25.4f;
             int count=(int)(h/pixelsPerMm);
-            float base=left?band-inset:w-band+inset;
+            float cmMarkLength=46*density;
+            float labelGap=5*pixelsPerMmX;
+            float labelHalfHeight=10.5f*density;
+            float labelX=left?cmMarkLength+labelGap+labelHalfHeight:w-cmMarkLength-labelGap-labelHalfHeight;
             for(int mm=0;mm<=count;mm++) {
                 float y=left?mm*pixelsPerMm:h-mm*pixelsPerMm;
                 int unit=mm%10;
                 float length=(unit==0?46:unit==5?34:22)*density;
-                float end=left?base-length:base+length;
-                tick(c,base,y,end,unit==0?1.8f*density:unit==5?1.35f*density:0.9f*density);
-                if(unit==0) number(c,Integer.toString(mm/10),left?band*0.49f:w-band*0.49f,y,left);
+                float start=left?0:w;
+                float end=left?length:w-length;
+                tick(c,start,y,end,unit==0?1.8f*density:unit==5?1.35f*density:0.9f*density);
+                if(unit==0) number(c,Integer.toString(mm/10),labelX,y,left);
             }
         }
 
