@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
             float pixelsPerMmX=xdpi/25.4f;
             int count=(int)(h/pixelsPerMm);
             float cmMarkLength=46*density;
-            float labelGap=5*pixelsPerMmX;
+            float labelGap=2*pixelsPerMmX;
             float labelHalfHeight=10.5f*density;
             float labelX=left?cmMarkLength+labelGap+labelHalfHeight:w-cmMarkLength-labelGap-labelHalfHeight;
             for(int mm=0;mm<=count;mm++) {
@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
                 float length=(unit==0?46:unit==5?34:22)*density;
                 float start=left?0:w;
                 float end=left?length:w-length;
-                tick(c,start,y,end,unit==0?1.8f*density:unit==5?1.35f*density:0.9f*density);
+                if (y > 0.5f) tick(c,start,y,end,unit==0?1.8f*density:unit==5?1.35f*density:0.9f*density);
                 if(unit==0) number(c,Integer.toString(mm/10),labelX,y,left);
             }
         }
