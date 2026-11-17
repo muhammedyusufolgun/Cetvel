@@ -7,10 +7,13 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.Typeface;
-import android.graphics.RectF;
 import android.view.View;
-import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.graphics.drawable.GradientDrawable;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
@@ -24,7 +27,24 @@ public class MainActivity extends Activity {
             attrs.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             getWindow().setAttributes(attrs);
         }
-        setContentView(new RulerView());
+        FrameLayout root=new FrameLayout(this);
+        root.addView(new RulerView(),new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT));
+        DisplayMetrics metrics=getResources().getDisplayMetrics();
+        float density=metrics.density;
+        int buttonWidth=Math.round(28*density), buttonHeight=Math.round(36*density);
+        int centerY=Math.round(140f*metrics.ydpi/25.4f);
+        TextView close=new TextView(this);
+        close.setText("X"); close.setTextSize(23); close.setTextColor(0xff333333);
+        close.setGravity(Gravity.CENTER); close.setIncludeFontPadding(false);
+        close.setContentDescription("Uygulamayı kapat");
+        GradientDrawable bg=new GradientDrawable(); bg.setColor(0xffffd0d0); bg.setCornerRadius(6*density);
+        close.setBackground(bg); close.setClickable(true); close.setFocusable(true);
+        close.setOnClickListener(v -> finishAndRemoveTask());
+        FrameLayout.LayoutParams buttonParams=new FrameLayout.LayoutParams(buttonWidth,buttonHeight,Gravity.TOP|Gravity.CENTER_HORIZONTAL);
+        buttonParams.topMargin=centerY-buttonHeight/2;
+        root.addView(close,buttonParams);
+        setContentView(root);
     }
 
     private final class RulerView extends View {
@@ -33,7 +53,6 @@ public class MainActivity extends Activity {
         private final float xdpi = getResources().getDisplayMetrics().xdpi;
         private final float ydpi = getResources().getDisplayMetrics().ydpi;
         private final float band = 100 * density;
-        private boolean closePressed = false;
         RulerView() { super(MainActivity.this); setLayerType(View.LAYER_TYPE_SOFTWARE, null); setBackgroundColor(0xffffffff); }
 
         private void drawSteel(Canvas c, float w, float h) {
@@ -80,38 +99,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        private RectF closeButtonBounds(float w) {
-            float buttonWidth=28*density, buttonHeight=36*density;
-            float centerY=140f*ydpi/25.4f;
-            return new RectF((w-buttonWidth)/2f,centerY-buttonHeight/2f,
-                    (w+buttonWidth)/2f,centerY+buttonHeight/2f);
-        }
-
-        private void drawCloseButton(Canvas c,float w) {
-            RectF b=closeButtonBounds(w);
-            p.setShader(null); p.setStyle(Paint.Style.FILL);
-            p.setColor(closePressed?0xfff3aaaa:0xffffd0d0);
-            c.drawRoundRect(b,9*density,9*density,p);
-            p.setColor(0xff333333); p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));
-            p.setTextAlign(Paint.Align.CENTER); p.setTextSize(23*density);
-            c.drawText("X",b.centerX(),b.centerY()+8*density,p);
-        }
-
-        @Override public boolean onTouchEvent(MotionEvent event) {
-            RectF button=closeButtonBounds(getWidth());
-            if (event.getAction()==MotionEvent.ACTION_DOWN && button.contains(event.getX(),event.getY())) {
-                closePressed=true; invalidate(); return true;
-            }
-            if (event.getAction()==MotionEvent.ACTION_UP && closePressed) {
-                boolean close=button.contains(event.getX(),event.getY()); closePressed=false; invalidate();
-                if (close) finish(); return true;
-            }
-            if (event.getAction()==MotionEvent.ACTION_CANCEL && closePressed) {
-                closePressed=false; invalidate(); return true;
-            }
-            return true;
-        }
-
         @Override protected void onDraw(Canvas canvas) {
             super.onDraw(canvas); float w=getWidth(),h=getHeight(); canvas.drawColor(0xffffffff);
             drawSteel(canvas,w,h); edgeScale(canvas,w,h,true); edgeScale(canvas,w,h,false);
@@ -120,7 +107,6 @@ public class MainActivity extends Activity {
             float cy=h/2f; canvas.drawText("Mobil Cetvel",w/2f,50f*ydpi/25.4f,p);
             p.setColor(0xffb5b5b5); p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL)); p.setTextSize(14*density);
             canvas.drawText("Muhammed Yusuf OLGUN",w/2f,150f*ydpi/25.4f,p);
-            drawCloseButton(canvas,w);
         }
     }
 }
