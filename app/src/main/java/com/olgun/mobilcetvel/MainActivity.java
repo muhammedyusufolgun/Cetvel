@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final float density = getResources().getDisplayMetrics().density;
         private final float ydpi = getResources().getDisplayMetrics().ydpi;
-        private final float band = 64 * density;
+        private final float band = 100 * density;
         private final float inset = 6 * density;
         RulerView() { super(MainActivity.this); setLayerType(View.LAYER_TYPE_SOFTWARE, null); setBackgroundColor(0xffffffff); }
 
@@ -45,8 +45,8 @@ public class MainActivity extends Activity {
         }
 
         private void number(Canvas c,String value,float x,float y,boolean left) {
-            p.setShader(null); p.setColor(0xff101417); p.setTextSize(16*density);
-            p.setTypeface(Typeface.create("sans-serif-condensed",Typeface.BOLD)); p.setTextAlign(Paint.Align.CENTER);
+            p.setShader(null); p.setColor(0xff101417); p.setTextSize(21*density);
+            p.setTypeface(Typeface.create("sans-serif-condensed",Typeface.NORMAL)); p.setTextAlign(Paint.Align.CENTER);
             c.save(); c.rotate(left?90:-90,x,y); c.drawText(value,x,y+5*density,p); c.restore();
         }
 
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
             for(int mm=0;mm<=count;mm++) {
                 float y=left?mm*pixelsPerMm:h-mm*pixelsPerMm;
                 int unit=mm%10;
-                float length=(unit==0?30:unit==5?22:14)*density;
+                float length=(unit==0?46:unit==5?34:22)*density;
                 float end=left?base-length:base+length;
                 tick(c,base,y,end,unit==0?1.8f*density:unit==5?1.35f*density:0.9f*density);
                 if(unit==0) number(c,Integer.toString(mm/10),left?band*0.49f:w-band*0.49f,y,left);
