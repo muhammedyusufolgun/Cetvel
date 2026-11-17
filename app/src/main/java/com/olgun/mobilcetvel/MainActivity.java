@@ -81,15 +81,10 @@ public class MainActivity extends Activity {
         }
 
         private RectF closeButtonBounds(float w) {
-            float size=48*density;
-            float top=ydpi/25.4f*10f;
-            if (android.os.Build.VERSION.SDK_INT >= 28) {
-                android.view.WindowInsets insets=getRootWindowInsets();
-                if (insets != null && insets.getDisplayCutout() != null) {
-                    top=Math.max(top,insets.getDisplayCutout().getSafeInsetTop()+4*density);
-                }
-            }
-            return new RectF((w-size)/2f,top,(w+size)/2f,top+size);
+            float buttonWidth=28*density, buttonHeight=36*density;
+            float centerY=140f*ydpi/25.4f;
+            return new RectF((w-buttonWidth)/2f,centerY-buttonHeight/2f,
+                    (w+buttonWidth)/2f,centerY+buttonHeight/2f);
         }
 
         private void drawCloseButton(Canvas c,float w) {
@@ -122,7 +117,7 @@ public class MainActivity extends Activity {
             drawSteel(canvas,w,h); edgeScale(canvas,w,h,true); edgeScale(canvas,w,h,false);
             p.setShader(null); p.setTextAlign(Paint.Align.CENTER); p.setColor(0xff111111);
             p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL)); p.setTextSize(28*density);
-            float cy=h/2f; canvas.drawText("Mobil Cetvel",w/2f,cy-10*density,p);
+            float cy=h/2f; canvas.drawText("Mobil Cetvel",w/2f,50f*ydpi/25.4f,p);
             p.setColor(0xffb5b5b5); p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL)); p.setTextSize(14*density);
             canvas.drawText("Muhammed Yusuf OLGUN",w/2f,150f*ydpi/25.4f,p);
             drawCloseButton(canvas,w);
