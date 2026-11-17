@@ -7,7 +7,9 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.Typeface;
+import android.graphics.RectF;
 import android.view.View;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 
 public class MainActivity extends Activity {
@@ -31,7 +33,7 @@ public class MainActivity extends Activity {
         private final float xdpi = getResources().getDisplayMetrics().xdpi;
         private final float ydpi = getResources().getDisplayMetrics().ydpi;
         private final float band = 100 * density;
-        private final float inset = 6 * density;
+        private boolean closePressed = false;
         RulerView() { super(MainActivity.this); setLayerType(View.LAYER_TYPE_SOFTWARE, null); setBackgroundColor(0xffffffff); }
 
         private void drawSteel(Canvas c, float w, float h) {
@@ -44,8 +46,6 @@ public class MainActivity extends Activity {
                     new int[]{0xffd4c7a8,0xfffff7e4,0xffeee1c5,0xfffff9e9,0xffd9c9a7},
                     new float[]{0f,0.08f,0.5f,0.92f,1f}, Shader.TileMode.CLAMP));
             c.drawRect(w-band,0,w,h,p); p.setShader(null);
-            p.setColor(0xff687177); p.setStrokeWidth(Math.max(1f,density));
-            c.drawLine(band-inset,0,band-inset,h,p); c.drawLine(w-band+inset,0,w-band+inset,h,p);
             p.setColor(0xffffffff); p.setStrokeWidth(density*0.8f);
             c.drawLine(2*density,0,2*density,h,p); c.drawLine(w-2*density,0,w-2*density,h,p);
         }
@@ -80,14 +80,52 @@ public class MainActivity extends Activity {
             }
         }
 
+        private RectF closeButtonBounds(float w) {
+            float size=48*density;
+            float top=ydpi/25.4f*10f;
+            if (android.os.Build.VERSION.SDK_INT >= 28) {
+                android.view.WindowInsets insets=getRootWindowInsets();
+                if (insets != null && insets.getDisplayCutout() != null) {
+                    top=Math.max(top,insets.getDisplayCutout().getSafeInsetTop()+4*density);
+                }
+            }
+            return new RectF((w-size)/2f,top,(w+size)/2f,top+size);
+        }
+
+        private void drawCloseButton(Canvas c,float w) {
+            RectF b=closeButtonBounds(w);
+            p.setShader(null); p.setStyle(Paint.Style.FILL);
+            p.setColor(closePressed?0xfff3aaaa:0xffffd0d0);
+            c.drawRoundRect(b,9*density,9*density,p);
+            p.setColor(0xff333333); p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));
+            p.setTextAlign(Paint.Align.CENTER); p.setTextSize(23*density);
+            c.drawText("X",b.centerX(),b.centerY()+8*density,p);
+        }
+
+        @Override public boolean onTouchEvent(MotionEvent event) {
+            RectF button=closeButtonBounds(getWidth());
+            if (event.getAction()==MotionEvent.ACTION_DOWN && button.contains(event.getX(),event.getY())) {
+                closePressed=true; invalidate(); return true;
+            }
+            if (event.getAction()==MotionEvent.ACTION_UP && closePressed) {
+                boolean close=button.contains(event.getX(),event.getY()); closePressed=false; invalidate();
+                if (close) finish(); return true;
+            }
+            if (event.getAction()==MotionEvent.ACTION_CANCEL && closePressed) {
+                closePressed=false; invalidate(); return true;
+            }
+            return true;
+        }
+
         @Override protected void onDraw(Canvas canvas) {
             super.onDraw(canvas); float w=getWidth(),h=getHeight(); canvas.drawColor(0xffffffff);
             drawSteel(canvas,w,h); edgeScale(canvas,w,h,true); edgeScale(canvas,w,h,false);
             p.setShader(null); p.setTextAlign(Paint.Align.CENTER); p.setColor(0xff111111);
             p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL)); p.setTextSize(28*density);
             float cy=h/2f; canvas.drawText("Mobil Cetvel",w/2f,cy-10*density,p);
-            p.setColor(0xff888888); p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL)); p.setTextSize(14*density);
-            canvas.drawText("Muhammed Yusuf OLGUN",w/2f,cy+38*density,p);
+            p.setColor(0xffb5b5b5); p.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL)); p.setTextSize(14*density);
+            canvas.drawText("Muhammed Yusuf OLGUN",w/2f,150f*ydpi/25.4f,p);
+            drawCloseButton(canvas,w);
         }
     }
 }
